@@ -29,8 +29,13 @@ function addVegetables(vegetable) {
   vegetables.push(vegetable)
 }
 
+function addFruit(fruit) {
+  fruits.push(fruit)
+}
+
 module.exports = {
   getAllFruit,
   getAllVegetables,
   addVegetables,
+  addFruit,
 };
