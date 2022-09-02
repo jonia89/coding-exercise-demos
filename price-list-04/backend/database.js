@@ -33,9 +33,23 @@ function addFruit(fruit) {
   fruits.push(fruit)
 }
 
+function searchFruit(searchText) {
+  return fruits.filter((fruit) => {
+    return fruit.name.startsWith(searchText)
+  })
+}
+
+function searchVegetables(searchText) {
+  return vegetables.filter((vegetable) => {
+    return vegetable.name.startsWith(searchText)
+  })
+}
+
 module.exports = {
   getAllFruit,
   getAllVegetables,
   addVegetables,
   addFruit,
+  searchFruit,
+  searchVegetables,
 };

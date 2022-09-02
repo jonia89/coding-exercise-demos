@@ -2,19 +2,27 @@ const express = require('express')
 const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 3000
-const { getAllFruit, getAllVegetables, addFruit } = require('./database')
+const { getAllFruit, getAllVegetables, addFruit, searchFruit, searchVegetables } = require('./database')
 
 app.use(cors())
 app.use(express.json())
 
 app.get('/store/fruit', (req, res) => {
   console.log(`${new Date()} - INFO - Called fruit /store/fruit`);
-  res.json(getAllFruit())
+  if (req.query.search) {
+    res.json(searchFruit(req.query.search))
+  } else {
+    res.json(getAllFruit())
+  }
 })
 
 app.get('/store/vegetables', (req, res) => {
   console.log(`${new Date()} - INFO - Called vegetables /store/vegetables`);
-  res.json(getAllVegetables())
+  if (req.query.search) {
+    res.json(searchVegetables(req.query.search))
+  } else {
+    res.json(getAllVegetables())
+  }
 })
 
 app.get('/', (req, res) => {
