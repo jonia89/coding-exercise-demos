@@ -1,55 +1,92 @@
-const fruits = [
-  { name: "banana", price: 3 },
-  { name: "watermelon", price: 7 },
-  { name: "pineapple", price: 5 },
-  { name: "starfruit", price: 9 },
-  { name: "orange", price: 1},
-  { name: "strawberry", price: 2 },
-];
+const { Pool } = require("pg");
 
-const vegetables = [
-  { name: "cucumber", price: 2 },
-  { name: "potato", price: 1 },
-  { name: "carrot", price: 6 },
-  { name: "zucchini", price: 100 },
-  { name: "broccoli", price: 5 },
-  { name: "tomato", price: 3 },
-  { name: "onion", price: 2 },
-];
+const pool = new Pool();
 
-function getAllFruit() {
-  return fruits;
+async function readFruit(id) {
+  const res = await pool.query(
+    "SELECT id, name, price FROM food WHERE type = 'fruit' AND id = $1;",
+    [id]
+  );
+  return res.rows;
 }
 
-function getAllVegetables() {
-  return vegetables;
+async function readVegetable(id) {
+  const res = await pool.query(
+    "SELECT id, name, price FROM food WHERE type = 'vegetable' AND id = $1;",
+    [id]
+  );
+  return res.rows;
 }
 
-function addVegetables(vegetable) {
-  vegetables.push(vegetable)
+async function readAllFruit() {
+  const res = await pool.query(
+    "SELECT id, name, price FROM food WHERE type = 'fruit';"
+  );
+  return res.rows;
 }
 
-function addFruit(fruit) {
-  fruits.push(fruit)
+async function readAllVegetables() {
+  const res = await pool.query(
+    "SELECT id, name, price FROM food WHERE type = 'vegetable';"
+  );
+  return res.rows;
 }
 
-function searchFruit(searchText) {
-  return fruits.filter((fruit) => {
-    return fruit.name.startsWith(searchText)
-  })
+async function createVegetables(vegetable) {
+  await pool.query("INSERT INTO food (type, name, price) VALUES ($1, $2, $3)", [
+    "vegetable",
+    vegetable.name,
+    vegetable.price,
+  ]);
 }
 
-function searchVegetables(searchText) {
-  return vegetables.filter((vegetable) => {
-    return vegetable.name.startsWith(searchText)
-  })
+async function createFruit(fruit) {
+  await pool.query("INSERT INTO food (type, name, price) VALUES ($1, $2, $3)", [
+    "fruit",
+    fruit.name,
+    fruit.price,
+  ]);
+}
+
+async function updateFruit(id, fruit) {
+  await pool.query(
+    "UPDATE food SET type = $2, name = $3, price = $4 WHERE id = $1;",
+    [id, "fruit", fruit.name, fruit.price]
+  );
+}
+
+async function updateVegetables(id, vegetable) {
+  await pool.query(
+    "UPDATE food SET type = $2, name = $3, price = $4 WHERE id = $1;",
+    [id, "vegetable", vegetable.name, vegetable.price]
+  );
+}
+
+async function searchFruit(searchText) {
+  const res = await pool.query(
+    "SELECT id, name, price FROM food WHERE type = 'fruit' AND name LIKE $1;",
+    [`%${searchText}%`]
+  );
+  return res.rows;
+}
+
+async function searchVegetables(searchText) {
+  const res = await pool.query(
+    "SELECT id, name, price FROM food WHERE type = 'vegetable' AND name LIKE $1%;",
+    [`%${searchText}%`]
+  );
+  return res.rows;
 }
 
 module.exports = {
-  getAllFruit,
-  getAllVegetables,
-  addVegetables,
-  addFruit,
+  readAllFruit,
+  readAllVegetables,
+  createVegetables,
+  createFruit,
   searchFruit,
   searchVegetables,
+  updateFruit,
+  updateVegetables,
+  readVegetable,
+  readFruit,
 };

@@ -1,41 +1,86 @@
-const express = require('express')
-const cors = require('cors')
-const app = express()
-const port = process.env.PORT || 3000
-const { getAllFruit, getAllVegetables, addFruit, searchFruit, searchVegetables } = require('./database')
+const express = require("express");
+const cors = require("cors");
+const app = express();
+const port = process.env.PORT || 3000;
+const {
+  readFruit,
+  readAllFruit,
+  readVegetable,
+  readAllVegetables,
+  createFruit,
+  updateFruit,
+  updateVegetables,
+  createVegetables,
+  searchFruit,
+  searchVegetables,
+} = require("./database");
 
-app.use(cors())
-app.use(express.json())
+app.use(cors());
+app.use(express.json());
 
-app.get('/store/fruit', (req, res) => {
+app.get("/store/fruit", async (req, res) => {
   console.log(`${new Date()} - INFO - Called fruit /store/fruit`);
   if (req.query.search) {
-    res.json(searchFruit(req.query.search))
+    res.json(await searchFruit(req.query.search));
   } else {
-    res.json(getAllFruit())
+    res.json(await readAllFruit());
   }
-})
+});
 
-app.get('/store/vegetables', (req, res) => {
+app.get("/store/fruit/:id", async (req, res) => {
+  const id = req.params.id;
+  console.log(`${new Date()} - INFO - Called fruit /store/fruit/${id}`);
+  res.json(await readFruit(id));
+});
+
+app.post("/store/fruit", async (req, res) => {
+  console.log(`${new Date()} - INFO - Called fruit POST /store/fruit`);
+  await createFruit(req.body);
+  res.sendStatus(200);
+});
+
+app.put("/store/fruit/:id", async (req, res) => {
+  const id = req.params.id;
+  console.log(`${new Date()} - INFO - Called fruit PUT /store/fruit/${id}`);
+  await updateFruit(id, req.body);
+  res.sendStatus(200);
+});
+
+app.get("/store/vegetables", async (req, res) => {
   console.log(`${new Date()} - INFO - Called vegetables /store/vegetables`);
   if (req.query.search) {
-    res.json(searchVegetables(req.query.search))
+    res.json(await searchVegetables(req.query.search));
   } else {
-    res.json(getAllVegetables())
+    res.json(await readAllVegetables());
   }
-})
+});
 
-app.get('/', (req, res) => {
+app.get("/store/vegetables/:id", async (req, res) => {
+  const id = req.params.id;
+  console.log(`${new Date()} - INFO - Called fruit /store/vegetables/${id}`);
+  res.json(await readVegetable(id));
+});
+
+app.post("/store/vegetables", async (req, res) => {
+  console.log(`${new Date()} - INFO - Called fruit POST /store/vegetables`);
+  await createVegetables(req.body);
+  res.sendStatus(200);
+});
+
+app.put("/store/vegetables/:id", async (req, res) => {
+  const id = req.params.id;
+  console.log(`${new Date()} - INFO - Called fruit PUT /store/vegetables/${id}`);
+  await updateVegetables(id, req.body);
+  res.sendStatus(200);
+});
+
+// ----
+
+app.get("/", (req, res) => {
   console.log(`${new Date()} - INFO - Called /`);
-  res.redirect('/store/fruit')
-})
-
-app.post('/store/fruit', (req, res) => {
-  console.log(`${new Date()} - INFO - Called fruit POST /store/fruit`);
-  addFruit(req.body);
-  res.sendStatus(200)
-})
+  res.redirect("/store/fruit");
+});
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+  console.log(`Example app listening on port ${port}`);
+});
