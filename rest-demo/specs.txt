@@ -1,0 +1,26 @@
+Person
+Certificates
+
+createPerson -> OK
+readPerson -> {}
+readPersons -> []
+updatePerson -> OK
+deletePerson -> OK
+
+createCertificates -> OK
+readCertificates -> {}
+readCertificates -> []
+updateCertificates -> OK
+deleteCertificates -> OK
+
+GET /api/person -> readPersons()
+GET /api/person/:id -> readPerson(id)
+POST /api/person -> createPerson(person)
+PUT /api/person/:id -> updatePerson(id, person)
+DELETE /api/person/:id -> deletePerson(id)
+
+GET /api/person/:personId/certificates -> getCertificates(personId)
+GET /api/person/:personId/certificates/:certificateId -> getCertificates(personId, certificateId)
+POST /api/person/:personId/certificates -> createCertificates(personId, certificate)
+PUT /api/person/:personId/certificates/:certificateId -> updateCertificates(personId, certificateId, certificate)
+DELETE /api/person/:personId/certificates/:certificateId -> deleteCertificates(personId, certificateId)
