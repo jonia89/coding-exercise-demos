@@ -1,92 +1,78 @@
-const { Pool } = require("pg");
+const { v4: uuidv4 } = require("uuid");
+const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
+const {
+  DynamoDBDocumentClient,
+  PutCommand,
+  ScanCommand,
+  GetCommand,
+  UpdateCommand,
+  DeleteCommand,
+  QueryCommand,
+} = require("@aws-sdk/lib-dynamodb");
 
-const pool = new Pool();
+const REGION = "eu-north-1";
+const ddbClient = new DynamoDBClient({ region: REGION });
+const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 
-async function readFruit(id) {
-  const res = await pool.query(
-    "SELECT id, name, price FROM food WHERE type = 'fruit' AND id = $1;",
-    [id]
-  );
-  return res.rows;
+const databaseConfig = {
+  TableName: "fruit-table",
+};
+
+async function readFood(id) {
+  const params = {
+    ...databaseConfig,
+    Key: { id },
+  };
+  const data = await ddbDocClient.send(new GetCommand(params));
+  return data.Item;
 }
 
-async function readVegetable(id) {
-  const res = await pool.query(
-    "SELECT id, name, price FROM food WHERE type = 'vegetable' AND id = $1;",
-    [id]
-  );
-  return res.rows;
+async function readAllFood (type) {
+  const params = {
+    ...databaseConfig,
+    IndexName: 'type-index',
+    KeyConditionExpression: "#keyName = :t",
+    ExpressionAttributeNames: { "#keyName": "type" },
+    ExpressionAttributeValues: {
+      ":t": type,
+    },
+  };
+  
+  const data = await ddbDocClient.send(new QueryCommand(params));
+  return data.Items;
+};
+
+async function createFood(item) {
+  const params = {
+    ...databaseConfig,
+    Item: { id: uuidv4(), ...item },
+  };
+  await ddbDocClient.send(new PutCommand(params));
 }
 
-async function readAllFruit() {
-  const res = await pool.query(
-    "SELECT id, name, price FROM food WHERE type = 'fruit';"
-  );
-  return res.rows;
+async function updateFood(id, item) {
+  const params = {
+    ...databaseConfig,
+    Key: { id },
+    UpdateExpression: "set name = :name, price = :price",
+    ExpressionAttributeValues: {
+      ":price": item.price,
+      ":name": item.name,
+    },
+  };
+  await ddbDocClient.send(new UpdateCommand(params));
 }
 
-async function readAllVegetables() {
-  const res = await pool.query(
-    "SELECT id, name, price FROM food WHERE type = 'vegetable';"
-  );
-  return res.rows;
-}
 
-async function createVegetables(vegetable) {
-  await pool.query("INSERT INTO food (type, name, price) VALUES ($1, $2, $3)", [
-    "vegetable",
-    vegetable.name,
-    vegetable.price,
-  ]);
-}
+async function searchFruit(searchText) {}
 
-async function createFruit(fruit) {
-  await pool.query("INSERT INTO food (type, name, price) VALUES ($1, $2, $3)", [
-    "fruit",
-    fruit.name,
-    fruit.price,
-  ]);
-}
-
-async function updateFruit(id, fruit) {
-  await pool.query(
-    "UPDATE food SET type = $2, name = $3, price = $4 WHERE id = $1;",
-    [id, "fruit", fruit.name, fruit.price]
-  );
-}
-
-async function updateVegetables(id, vegetable) {
-  await pool.query(
-    "UPDATE food SET type = $2, name = $3, price = $4 WHERE id = $1;",
-    [id, "vegetable", vegetable.name, vegetable.price]
-  );
-}
-
-async function searchFruit(searchText) {
-  const res = await pool.query(
-    "SELECT id, name, price FROM food WHERE type = 'fruit' AND name LIKE $1;",
-    [`%${searchText}%`]
-  );
-  return res.rows;
-}
-
-async function searchVegetables(searchText) {
-  const res = await pool.query(
-    "SELECT id, name, price FROM food WHERE type = 'vegetable' AND name LIKE $1%;",
-    [`%${searchText}%`]
-  );
-  return res.rows;
-}
+async function searchVegetables(searchText) {}
 
 module.exports = {
-  readAllFruit,
-  readAllVegetables,
-  createVegetables,
-  createFruit,
+  readAllFood,
+  updateFood,
+  createFood,
   searchFruit,
   searchVegetables,
-  updateFruit,
-  updateVegetables,
-  readVegetable,
-  readFruit,
+  readFood,
 };

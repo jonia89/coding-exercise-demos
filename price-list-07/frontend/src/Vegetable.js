@@ -7,7 +7,7 @@ export function Vegetable() {
   const onSubmit = (data) => {
     console.log("Searching for this:", data.searchText);
     fetch(
-      "http://localhost:3000/store/vegetables?" +
+      "http://localhost:3000/store/vegetable?" +
         new URLSearchParams({
           search: data.searchText,
         }),
@@ -28,7 +28,7 @@ export function Vegetable() {
   };
 
   const fetchData = () => {
-    fetch("http://localhost:3000/store/vegetables")
+    fetch("http://localhost:3000/store/vegetable")
       .then((response) => {
         return response.json();
       })

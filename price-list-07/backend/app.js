@@ -3,16 +3,11 @@ const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 3000;
 const {
-  readFruit,
-  readAllFruit,
-  readVegetable,
-  readAllVegetables,
-  createFruit,
-  updateFruit,
-  updateVegetables,
-  createVegetables,
+  readAllFood,
+  createFood,
   searchFruit,
-  searchVegetables,
+  updateFood,
+  readFood,
 } = require("./database");
 
 app.use(cors());
@@ -31,68 +26,37 @@ function exceptionBarrier(cb) {
   return routeFn;
 }
 
-app.get("/store/fruit", exceptionBarrier(async (req, res) => {
-  console.log(`${new Date()} - INFO - Called fruit /store/fruit`);
+app.get("/store/:type", exceptionBarrier(async (req, res) => {
+  console.log(`${new Date()} - INFO - Called /store/${req.params.type}`);
   if (req.query.search) {
     res.json(await searchFruit(req.query.search));
   } else {
-    res.json(await readAllFruit());
+    res.json(await readAllFood(req.params.type));
   }
 }));
 
-app.get("/store/fruit/:id", exceptionBarrier(async (req, res) => {
+app.get("/store/:type/:id", exceptionBarrier(async (req, res) => {
   const id = req.params.id;
-  console.log(`${new Date()} - INFO - Called fruit /store/fruit/${id}`);
-  res.json(await readFruit(id));
+  const type = req.params.type;
+  console.log(`${new Date()} - INFO - Called fruit /store/${type}/${id}`);
+  res.json(await readFood(id));
 }));
 
-app.post("/store/fruit", exceptionBarrier(async (req, res) => {
-  console.log(`${new Date()} - INFO - Called fruit POST /store/fruit`);
-  await createFruit(req.body);
+app.post("/store/:type", exceptionBarrier(async (req, res) => {
+  const type = req.params.type;
+  console.log(`${new Date()} - INFO - Called POST /store/${type}`);
+  await createFood(req.body);
   res.sendStatus(200);
 }));
 
-app.put("/store/fruit/:id", exceptionBarrier(async (req, res) => {
+app.put("/store/:type/:id", exceptionBarrier(async (req, res) => {
   const id = req.params.id;
-  console.log(`${new Date()} - INFO - Called fruit PUT /store/fruit/${id}`);
-  await updateFruit(id, req.body);
+  const type = req.params.type;
+  console.log(`${new Date()} - INFO - Called PUT /store/${type}/${id}`);
+  await updateFood(id, req.body);
   res.sendStatus(200);
 }));
 
-app.get("/store/vegetables", exceptionBarrier(async (req, res) => {
-  console.log(`${new Date()} - INFO - Called vegetables /store/vegetables`);
-  if (req.query.search) {
-    res.json(await searchVegetables(req.query.search));
-  } else {
-    res.json(await readAllVegetables());
-  }
-}));
-
-app.get("/store/vegetables/:id", exceptionBarrier(async (req, res) => {
-  const id = req.params.id;
-  console.log(`${new Date()} - INFO - Called fruit /store/vegetables/${id}`);
-  res.json(await readVegetable(id));
-}));
-
-app.post("/store/vegetables", exceptionBarrier(async (req, res) => {
-  console.log(`${new Date()} - INFO - Called fruit POST /store/vegetables`);
-  await createVegetables(req.body);
-  res.sendStatus(200);
-}));
-
-app.put("/store/vegetables/:id", exceptionBarrier(async (req, res) => {
-  const id = req.params.id;
-  console.log(`${new Date()} - INFO - Called fruit PUT /store/vegetables/${id}`);
-  await updateVegetables(id, req.body);
-  res.sendStatus(200);
-}));
-
-// ----
-
-app.get("/", (req, res) => {
-  console.log(`${new Date()} - INFO - Called /`);
-  res.redirect("/store/fruit");
-});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
